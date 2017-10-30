@@ -6,7 +6,7 @@ OBJDIR = build
 TESTDIR = test
 
 CC = gcc
-CFLAGS = -O3 -Wall -ansi -pedantic -I $(INCLUDEDIR)
+CFLAGS = -O3 -Wall -ansi -pedantic -I $(INCLUDEDIR) -lm
 LDFLAGS =
 
 BIN = ${BINDIR}/catarata

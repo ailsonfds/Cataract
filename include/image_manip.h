@@ -4,6 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+
+const double PI = 3.14159265359;
+const double E = 2.71828182846;
+
+FILE * error_file;
 
 typedef struct tagBITMAPFILEHEADER{  /* ocupa 14 bytes e é o 1° a aparecer no ficheiro */
 	char bfType[3]; /* especifica o firmato BM */
@@ -62,6 +68,14 @@ void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset
 
 void write_pixels(RGBQUAD **matriz, int height, int width, FILE *img, int offset);
 
-BWQUAD** bw_trasnform(RGBQUAD **matriz, int height, int width);
+RGBQUAD** bw_transform(RGBQUAD **matriz, int height, int width);
+
+RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width);
+
+/**
+ * Algumas funções auxiliares
+ */
+double mean(int *range, int n);
+double deviation(int *range, int n);
 
 #endif /*__IMAGE_MANIP_H__*/

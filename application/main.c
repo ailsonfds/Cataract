@@ -1,15 +1,17 @@
 #include "image_manip.h"
 
 int main(int argc, char **argv){
+	int i;
 	FILE *input_img = fopen(argv[1], "rb");
 	FILE *output_img;
 	PPMFILEHEADER ppm_header;
 	RGBQUAD **matriz;
-	BWQUAD **bw_matriz;
+	RGBQUAD **bw_matriz;
+	RGBQUAD **gauss_matriz;
 	char outstr[50] = "";
 
 	strncpy(outstr, argv[1], strlen(argv[1])-4);
-	strcat(outstr, "_bw.pgm");
+	strcat(outstr, "_bw.ppm");
 
 	if(input_img == NULL){
 		fprintf(stderr, "File not opened!!\n");
@@ -20,9 +22,8 @@ int main(int argc, char **argv){
 	read_pixels(&matriz, ppm_header.height, ppm_header.width, input_img, ppm_header.offset);
 	fclose(input_img);
 
-	strcpy(ppm_header.type,"P5");
-
-	bw_matriz = bw_trasnform(matriz, ppm_header.height, ppm_header.width);
+	bw_matriz = bw_transform(matriz, ppm_header.height, ppm_header.width);
+	gauss_matriz = gauss_filter(bw_matriz, ppm_header.height, ppm_header.width);
 
 	output_img = fopen(outstr,"wb");
 
@@ -32,8 +33,27 @@ int main(int argc, char **argv){
 	}
 
 	write_header_PPM(output_img, ppm_header);
-	write_pixels_PGM(bw_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
+	write_pixels(bw_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
 	fclose(output_img);
+
+	for(i = 0; i < 50; i++){
+		outstr[i] = '\0';
+	}
+	strncpy(outstr, argv[1], strlen(argv[1])-4);
+	strcat(outstr, "_gauss.ppm");
+
+	output_img = fopen(outstr,"wb");
+
+	if(output_img == NULL){
+		fprintf(stderr, "File not opened!!\n");
+		return 0;
+	}
+
+	write_header_PPM(output_img, ppm_header);
+	write_pixels(gauss_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
+	fclose(output_img);
+
+
 
 	return EXIT_SUCCESS;
 }

@@ -89,7 +89,7 @@ void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset
     }
 }
 
-void write_pixels_PGM(BWQUAD **matriz, int height, int width, FILE *img, int offset){
+/*void write_pixels_PGM(BWQUAD **matriz, int height, int width, FILE *img, int offset){
     int i, j;
     char type[3];
     strcpy(type, "");
@@ -103,7 +103,7 @@ void write_pixels_PGM(BWQUAD **matriz, int height, int width, FILE *img, int off
             fprintf(img,"%c",matriz[i][j].bwPix);
         }
     }
-}
+}*/
 
 void write_pixels(RGBQUAD **matriz, int height, int width, FILE *img, int offset){
     int i, j;
@@ -124,7 +124,24 @@ void write_pixels(RGBQUAD **matriz, int height, int width, FILE *img, int offset
     }
 }
 
-BWQUAD** bw_trasnform(RGBQUAD **matriz, int height, int width){
+RGBQUAD** bw_transform(RGBQUAD **matriz, int height, int width){
+	int i, j;
+    int cinza;
+    RGBQUAD** bw_matriz;
+    bw_matriz=(RGBQUAD**)malloc(height*sizeof(RGBQUAD*));
+    for(i = 0; i < height; i++){
+        bw_matriz[i]=(RGBQUAD*)malloc(width*sizeof(RGBQUAD));
+        for(j = 0; j < width; j++){
+            cinza = (matriz[i][j].rgbRed*0.30) + (matriz[i][j].rgbGreen*0.59) + (matriz[i][j].rgbBlue*0.11);
+            bw_matriz[i][j].rgbRed = cinza;
+            bw_matriz[i][j].rgbGreen = cinza;
+            bw_matriz[i][j].rgbBlue = cinza;
+        }
+    }
+    return bw_matriz;
+}
+
+/*BWQUAD** bw_transform(RGBQUAD **matriz, int height, int width){
     int i, j;
     int blue, green, red;
     BWQUAD **bw_matriz;
@@ -139,4 +156,61 @@ BWQUAD** bw_trasnform(RGBQUAD **matriz, int height, int width){
         }
     }
     return bw_matriz;
+}*/
+
+double mean(int *range, int n){
+	int i;
+	double media = 0.0;
+	for(i = 0; i < n; i++){
+		media += range[i];
+	}
+	return (media*1.0)/(n*1.0);
 }
+
+double deviation(int *range, int n){
+	int i;
+	double desvio = 0.0;
+	double media = mean(range, n);
+	for(i = 0; i < n; i++){
+		desvio += pow((media - range[i]),2);
+	}
+	return sqrt(desvio/((n*1.0)-1));
+}
+
+RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width){
+	int i, j, a, b;
+	int rangeRed[25] = {0}, rangeBlue[25] = {0}, rangeGreen[25] = {0};
+	double media = 0.0, desvio = 0.0;
+	RGBQUAD** gauss = (RGBQUAD**)calloc(height, sizeof(RGBQUAD*));
+    error_file = fopen("erro.txt","w");
+    if (error_file == NULL){
+        abort();
+    }
+    fprintf(error_file, "%f %f\n", E, PI);
+    for(i = 0; i < height; i++){
+        gauss[i] = (RGBQUAD*)calloc(width, sizeof(RGBQUAD));
+        for(j = 0; j < width; j++){
+			for(a = -(5/2); a < (5/2); a++){
+				for(b = -(5/2); b < (5/2); b++){
+					if(i+a >= 0 && j+b >= 0 && i+a < height && j+b < width){
+						rangeRed[((a+(5/2))*5)+(b+(5/2))] = matriz[i+a][j+b].rgbRed;
+						rangeBlue[((a+(5/2))*5)+(b+(5/2))] = matriz[i+a][j+b].rgbBlue;
+						rangeGreen[((a+(5/2))*5)+(b+(5/2))] = matriz[i+a][j+b].rgbGreen;
+					}
+				}
+			}
+			media = mean(rangeRed, 25);
+			desvio = deviation(rangeRed, 25);
+			gauss[i][j].rgbRed = pow(E,pow(2, (media - matriz[i][j].rgbRed)/(2.0*desvio)))/(desvio*sqrt(2.0*PI));
+			media = mean(rangeBlue, 25);
+			desvio = deviation(rangeBlue, 25);
+			gauss[i][j].rgbBlue = pow(E,pow(2, (media - matriz[i][j].rgbBlue)/(2.0*desvio)))/(desvio*sqrt(2.0*PI));
+			media = mean(rangeGreen, 25);
+			desvio = deviation(rangeGreen, 25);
+			gauss[i][j].rgbGreen = pow(E,pow(2, (media - matriz[i][j].rgbGreen)/(2.0*desvio)))/(desvio*sqrt(2.0*PI));
+            fprintf(error_file, "%d %d %d\n", gauss[i][j].rgbRed, gauss[i][j].rgbGreen, gauss[i][j].rgbBlue);
+        }
+    }
+	return gauss;
+}
+

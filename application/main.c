@@ -1,6 +1,7 @@
 #include "image_manip.h"
 
 double ** matriz_filtro();
+double ** matriz_filtro_gaussiano(double desvio);
 
 int main(int argc, char **argv){
 	int i;
@@ -10,7 +11,7 @@ int main(int argc, char **argv){
 	RGBQUAD **matriz;
 	/*RGBQUAD **bw_matriz;*/
 	RGBQUAD **gauss_matriz;
-	double **gauss_filter_m = matriz_filtro();
+	double **gauss_filter_m = matriz_filtro_gaussiano(3.0);
 	char outstr[50] = "";
 
 	strncpy(outstr, argv[1], strlen(argv[1])-4);
@@ -87,4 +88,32 @@ double ** matriz_filtro(){
         }
     }
     return matriz;
+}
+
+double ** matriz_filtro_gaussiano(double desvio){
+    int i, j, height = 5, width = 5;
+	double** gauss = (double**)calloc(height, sizeof(double*));
+
+    for(i = 0; i < height; i++){
+        gauss[i] = (double*)calloc(width, sizeof(double));
+        for(j = 0; j < width; j++){
+        	gauss[i][j] = 1;
+        }
+    }
+
+
+    for(i = 0; i < height; i++){
+        for(j = 0; j < width; j++){
+			gauss[i][j] = pow(E,(-1*(pow(i,2)+pow(j,2)))/2.0*pow(desvio,2))/(pow(desvio,2)*2.0*PI);
+        }
+    }
+
+    for(i = 0; i < height; i++){
+        for(j = 0; j < width; j++){
+			printf("%.3f\t",gauss[i][j]);
+        }
+        printf("\n");
+    }
+
+	return gauss;
 }

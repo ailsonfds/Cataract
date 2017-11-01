@@ -8,9 +8,9 @@ int main(int argc, char **argv){
 	FILE *output_img;
 	PPMFILEHEADER ppm_header;
 	RGBQUAD **matriz;
-	RGBQUAD **bw_matriz;
+	/*RGBQUAD **bw_matriz;*/
 	RGBQUAD **gauss_matriz;
-	/*double **gauss_filter_m = matriz_filtro();*/
+	double **gauss_filter_m = matriz_filtro();
 	char outstr[50] = "";
 
 	strncpy(outstr, argv[1], strlen(argv[1])-4);
@@ -25,9 +25,9 @@ int main(int argc, char **argv){
 	read_pixels(&matriz, ppm_header.height, ppm_header.width, input_img, ppm_header.offset);
 	fclose(input_img);
 
-	bw_matriz = bw_transform(matriz, ppm_header.height, ppm_header.width);
-	gauss_matriz = gauss_filter(bw_matriz, ppm_header.height, ppm_header.width);
-	/*gauss_matriz = filter(bw_matriz, ppm_header.height, ppm_header.width, gauss_filter_m, 5);*/
+	/*bw_matriz = bw_transform(matriz, ppm_header.height, ppm_header.width);*/
+	/*gauss_matriz = gauss_filter(matriz, ppm_header.height, ppm_header.width);*/
+	gauss_matriz = filter(matriz, ppm_header.height, ppm_header.width, gauss_filter_m, 5);
 
 	/*output_img = fopen(outstr,"wb");
 

@@ -237,7 +237,7 @@ RGBQUAD** filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_
             new_image[i][j].rgbRed = sum_r;
             new_image[i][j].rgbGreen = sum_g;
             new_image[i][j].rgbBlue = sum_b;
-            fprintf(error_f, "%c/%.3f %c/%.3f %c/%.3f\n", new_image[i][j].rgbRed, sum_r, new_image[i][j].rgbGreen, sum_g, new_image[i][j].rgbBlue, sum_b);
+            fprintf(error_f, "%c/%.0f %c/%.0f %c/%.0f\n", new_image[i][j].rgbRed, sum_r, new_image[i][j].rgbGreen, sum_g, new_image[i][j].rgbBlue, sum_b);
         }
     }
     return new_image;

@@ -89,22 +89,6 @@ void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset
     }
 }
 
-/*void write_pixels_PGM(BWQUAD **matriz, int height, int width, FILE *img, int offset){
-    int i, j;
-    char type[3];
-    strcpy(type, "");
-    rewind(img);
-    i = fscanf(img, "%c%c", &type[0], &type[1]);
-    type[2] = '\0';
-    rewind(img);
-    fseek(img, offset, SEEK_SET);
-    for(i = 0; i < height; i++){
-        for(j = 0; j < width; j++){
-            fprintf(img,"%c",matriz[i][j].bwPix);
-        }
-    }
-}*/
-
 void write_pixels(RGBQUAD **matriz, int height, int width, FILE *img, int offset){
     int i, j;
     char type[3];
@@ -141,23 +125,6 @@ RGBQUAD** bw_transform(RGBQUAD **matriz, int height, int width){
     return bw_matriz;
 }
 
-/*BWQUAD** bw_transform(RGBQUAD **matriz, int height, int width){
-    int i, j;
-    int blue, green, red;
-    BWQUAD **bw_matriz;
-    bw_matriz=(BWQUAD**)malloc(height*sizeof(RGBQUAD*));
-    for(i = 0; i < height; i++){
-        bw_matriz[i]=(BWQUAD*)malloc(width*sizeof(RGBQUAD));
-        for(j = 0; j < width; j++){
-            red = (matriz[i][j].rgbRed*0.30);
-            green = (matriz[i][j].rgbGreen*0.59);
-            blue = (matriz[i][j].rgbBlue*0.11);
-            bw_matriz[i][j].bwPix = red+blue+green;
-        }
-    }
-    return bw_matriz;
-}*/
-
 double mean(int *range, int n){
 	int i;
 	double media = 0.0;
@@ -167,7 +134,7 @@ double mean(int *range, int n){
 	return (media*1.0)/(n*1.0);
 }
 
-double deviation(int *range, int n){
+double std_deviation(int *range, int n){
 	int i;
 	double desvio = 0.0;
 	double media = mean(range, n);
@@ -182,11 +149,6 @@ RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width){
 	int rangeRed[25] = {0}, rangeBlue[25] = {0}, rangeGreen[25] = {0};
 	double media = 0.0, desvio = 0.0;
 	RGBQUAD** gauss = (RGBQUAD**)calloc(height, sizeof(RGBQUAD*));
-    error_file = fopen("erro.txt","w");
-    if (error_file == NULL){
-        abort();
-    }
-    fprintf(error_file, "%f %f\n", E, PI);
     for(i = 0; i < height; i++){
         gauss[i] = (RGBQUAD*)calloc(width, sizeof(RGBQUAD));
         for(j = 0; j < width; j++){
@@ -200,17 +162,44 @@ RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width){
 				}
 			}
 			media = mean(rangeRed, 25);
-			desvio = deviation(rangeRed, 25);
-			gauss[i][j].rgbRed = pow(E,pow(2, (media - matriz[i][j].rgbRed)/(2.0*desvio)))/(desvio*sqrt(2.0*PI));
+			/*desvio = std_deviation(rangeRed, 25);*/
+			gauss[i][j].rgbRed = pow(E,pow(media - matriz[i][j].rgbRed,2)/(2.0*desvio))/(desvio*sqrt(2.0*PI));
 			media = mean(rangeBlue, 25);
-			desvio = deviation(rangeBlue, 25);
-			gauss[i][j].rgbBlue = pow(E,pow(2, (media - matriz[i][j].rgbBlue)/(2.0*desvio)))/(desvio*sqrt(2.0*PI));
+			/*desvio = std_deviation(rangeBlue, 25);*/
+			gauss[i][j].rgbBlue = pow(E,pow(media - matriz[i][j].rgbBlue,2)/(2.0*desvio))/(desvio*sqrt(2.0*PI));
 			media = mean(rangeGreen, 25);
-			desvio = deviation(rangeGreen, 25);
-			gauss[i][j].rgbGreen = pow(E,pow(2, (media - matriz[i][j].rgbGreen)/(2.0*desvio)))/(desvio*sqrt(2.0*PI));
-            fprintf(error_file, "%d %d %d\n", gauss[i][j].rgbRed, gauss[i][j].rgbGreen, gauss[i][j].rgbBlue);
+			/*desvio = std_deviation(rangeGreen, 25);*/
+			gauss[i][j].rgbGreen = pow(E,pow(media - matriz[i][j].rgbGreen,2)/(2.0*desvio))/(desvio*sqrt(2.0*PI));
         }
     }
 	return gauss;
 }
 
+RGBQUAD** filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_filter, int m_size){
+    int i, j, a, b;
+    double sum_r, sum_g, sum_b;
+    RGBQUAD** new_image = (RGBQUAD**)calloc(img_height, sizeof(RGBQUAD*));
+    FILE * error_f = fopen("error.txt","w");
+    if(error_f == NULL) abort();
+    for(i = 0; i < img_height; i++){
+        new_image[i] = (RGBQUAD*)calloc(img_width, sizeof(RGBQUAD));
+        for(j = 0; j < img_width; j++){
+            sum_r = 0.0;
+            sum_g = 0.0;
+            sum_b = 0.0;
+            for(a = 0 - (m_size/2); a < m_size/2; a++){
+                for(b = 0 - (m_size/2); b < m_size/2; b++){
+                    if(i + a < 0 || j + b < 0 || i + a >= img_height || j + b >= img_width) continue;
+                    sum_r += m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j+b].rgbRed;
+                    sum_g += m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j+b].rgbGreen;
+                    sum_b += m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j+b].rgbBlue;
+                }
+            }
+            new_image[i][j].rgbRed = sum_r;
+            new_image[i][j].rgbGreen = sum_g;
+            new_image[i][j].rgbBlue = sum_b;
+            fprintf(error_f, "%c/%.3f %c/%.3f %c/%.3f\n", new_image[i][j].rgbRed, sum_r, new_image[i][j].rgbGreen, sum_g, new_image[i][j].rgbBlue, sum_b);
+        }
+    }
+    return new_image;
+}

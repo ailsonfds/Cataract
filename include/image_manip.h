@@ -6,8 +6,8 @@
 #include <string.h>
 #include <math.h>
 
-const double PI = 3.14159265359;
-const double E = 2.71828182846;
+#define PI 3.14159
+#define E 2.71828
 
 FILE * error_file;
 
@@ -72,10 +72,12 @@ RGBQUAD** bw_transform(RGBQUAD **matriz, int height, int width);
 
 RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width);
 
+RGBQUAD** filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_filter, int m_size);
+
 /**
  * Algumas funções auxiliares
  */
 double mean(int *range, int n);
-double deviation(int *range, int n);
+double std_deviation(int *range, int n);
 
 #endif /*__IMAGE_MANIP_H__*/

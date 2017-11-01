@@ -229,9 +229,9 @@ RGBQUAD** filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_
             for(a = 0 - (m_size/2); a < m_size/2; a++){
                 for(b = 0 - (m_size/2); b < m_size/2; b++){
                     if(i + a < 0 || j + b < 0 || i + a >= img_height || j + b >= img_width) continue;
-                    sum_r = sum_r + m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j + b].rgbRed;
-                    sum_g = sum_g + m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j + b].rgbGreen;
-                    sum_b = sum_b + m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j + b].rgbBlue;
+                    sum_r += m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j + b].rgbRed;
+                    sum_g += m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j + b].rgbGreen;
+                    sum_b += m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j + b].rgbBlue;
                 }
             }
             new_image[i][j].rgbRed = sum_r;

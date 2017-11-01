@@ -11,7 +11,7 @@ int main(int argc, char **argv){
 	RGBQUAD **matriz;
 	/*RGBQUAD **bw_matriz;*/
 	RGBQUAD **gauss_matriz;
-	double **gauss_filter_m = matriz_filtro_gaussiano(3.0);
+	double **gauss_filter_m = matriz_filtro();
 	char outstr[50] = "";
 
 	strncpy(outstr, argv[1], strlen(argv[1])-4);
@@ -96,24 +96,21 @@ double ** matriz_filtro_gaussiano(double desvio){
 
     for(i = 0; i < height; i++){
         gauss[i] = (double*)calloc(width, sizeof(double));
-        for(j = 0; j < width; j++){
-        	gauss[i][j] = 1;
-        }
     }
-
 
     for(i = 0; i < height; i++){
         for(j = 0; j < width; j++){
-			gauss[i][j] = pow(E,(-1*(pow(i,2)+pow(j,2)))/2.0*pow(desvio,2))/(pow(desvio,2)*2.0*PI);
+			gauss[i][j] = pow(E,(pow(i,2)+pow(j,2))/(-2.0)*pow(desvio,2))/(pow(desvio,2)*2.0*PI);
         }
     }
 
     for(i = 0; i < height; i++){
         for(j = 0; j < width; j++){
-			printf("%.3f\t",gauss[i][j]);
+			printf("%.15f\t",gauss[i][j]);
         }
         printf("\n");
     }
+    printf("\n");
 
 	return gauss;
 }

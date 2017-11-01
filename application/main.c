@@ -29,7 +29,7 @@ int main(int argc, char **argv){
 	gauss_matriz = gauss_filter(bw_matriz, ppm_header.height, ppm_header.width);
 	/*gauss_matriz = filter(bw_matriz, ppm_header.height, ppm_header.width, gauss_filter_m, 5);*/
 
-	output_img = fopen(outstr,"wb");
+	/*output_img = fopen(outstr,"wb");
 
 	if(output_img == NULL){
 		fprintf(stderr, "File not opened!!\n");
@@ -38,7 +38,7 @@ int main(int argc, char **argv){
 
 	write_header_PPM(output_img, ppm_header);
 	write_pixels(bw_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
-	fclose(output_img);
+	fclose(output_img);*/
 
 	for(i = 0; i < 50; i++){
 		outstr[i] = '\0';
@@ -64,15 +64,9 @@ int main(int argc, char **argv){
 
 double ** matriz_filtro(){
     int i, j;
-    double a00 = 1.0, a10 = 4.0, a20 = 7.0, a11 = 16.0, a21 = 26.0, a22 = 41;
+    double a00 = 1.0, a10 = 4.0, a20 = 7.0, a11 = 16.0, a21 = 26.0, a22 = 41.0;
     int cnst = 273;
-    /*double aux[5][5] = {
-        {a00/cnst, a10/cnst, a20/cnst, a10/cnst, a00/cnst},
-        {a10/cnst, a11/cnst, a21/cnst, a11/cnst, a10/cnst},
-        {a20/cnst, a21/cnst, a22/cnst, a21/cnst, a20/cnst},
-        {a10/cnst, a11/cnst, a21/cnst, a11/cnst, a10/cnst},
-        {a00/cnst, a10/cnst, a20/cnst, a10/cnst, a00/cnst},
-    };*/
+   
     double **matriz = malloc(5*sizeof(double*));
     for(i = 0; i < 5; i++){
         matriz[i] = malloc(5*sizeof(double));

@@ -144,15 +144,54 @@ double std_deviation(int *range, int n){
 	return sqrt(desvio/((n*1.0)-1));
 }
 
+double pix_mean(RGBQUAD **matriz, int height, int width, char rgb){
+    int i, j;
+    double media = 0.0;
+    for(i = 0; i < height; i++){
+        for(j = 0; j < width; j++){
+            if(rgb == 'r')
+                media += matriz[i][j].rgbRed;
+            else if(rgb == 'g')
+                media += matriz[i][j].rgbGreen;
+            else if(rgb == 'b')
+                media += matriz[i][j].rgbBlue;
+        }
+    }
+    return (media*1.0)/(height*width*1.0);
+}
+
+double pix_std_deviation(RGBQUAD **matriz, int height, int width, char rgb){
+    int i, j;
+    double desvio = 0.0;
+    double media = pix_mean(matriz, height, width, rgb);
+    for(i = 0; i < height; i++){
+        for(j = 0; j < width; j++){
+            if(rgb == 'r')
+                desvio += pow(media - matriz[i][j].rgbRed, 2);
+            else if(rgb == 'g')
+                desvio += pow(media - matriz[i][j].rgbGreen, 2);
+            else if(rgb == 'b')
+                desvio += pow(media - matriz[i][j].rgbBlue, 2);
+        }
+    }
+    return sqrt(desvio/((height*width*1.0)-1));
+}
+
 RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width){
-	int i, j, a, b;
-	int rangeRed[25] = {0}, rangeBlue[25] = {0}, rangeGreen[25] = {0};
-	double media = 0.0, desvio = 0.0;
-	RGBQUAD** gauss = (RGBQUAD**)calloc(height, sizeof(RGBQUAD*));
+	int i, j/*, a, b*/;
+	/*nt rangeRed[25] = {0}, rangeBlue[25] = {0}, rangeGreen[25] = {0};*/
+	double media_r = pix_mean(matriz, height, width, 'r'), media_g = pix_mean(matriz, height, width, 'g'), media_b = pix_mean(matriz, height, width, 'b');
+    double desvio_r = 10.0, desvio_g = 10.0, desvio_b = 10.0;
+    RGBQUAD** gauss = (RGBQUAD**)calloc(height, sizeof(RGBQUAD*));
+
+    /*desvio_r = pix_std_deviation(matriz, height, width, 'r');
+    desvio_g = pix_std_deviation(matriz, height, width, 'g');
+    desvio_b = pix_std_deviation(matriz, height, width, 'b');*/
+
     for(i = 0; i < height; i++){
         gauss[i] = (RGBQUAD*)calloc(width, sizeof(RGBQUAD));
         for(j = 0; j < width; j++){
-			for(a = -(5/2); a < (5/2); a++){
+			/*for(a = -(5/2); a < (5/2); a++){
 				for(b = -(5/2); b < (5/2); b++){
 					if(i+a >= 0 && j+b >= 0 && i+a < height && j+b < width){
 						rangeRed[((a+(5/2))*5)+(b+(5/2))] = matriz[i+a][j+b].rgbRed;
@@ -160,16 +199,16 @@ RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width){
 						rangeGreen[((a+(5/2))*5)+(b+(5/2))] = matriz[i+a][j+b].rgbGreen;
 					}
 				}
-			}
-			media = mean(rangeRed, 25);
+			}*/
+			/*media = mean(rangeRed, 25);*/
 			/*desvio = std_deviation(rangeRed, 25);*/
-			gauss[i][j].rgbRed = pow(E,pow(media - matriz[i][j].rgbRed,2)/(2.0*desvio))/(desvio*sqrt(2.0*PI));
-			media = mean(rangeBlue, 25);
+			gauss[i][j].rgbRed = pow(E,pow(media_r - matriz[i][j].rgbRed,2)/(2.0*desvio_r))/(desvio_r*sqrt(2.0*PI));
+			/*media = mean(rangeBlue, 25);*/
 			/*desvio = std_deviation(rangeBlue, 25);*/
-			gauss[i][j].rgbBlue = pow(E,pow(media - matriz[i][j].rgbBlue,2)/(2.0*desvio))/(desvio*sqrt(2.0*PI));
-			media = mean(rangeGreen, 25);
+			gauss[i][j].rgbBlue = pow(E,pow(media_b - matriz[i][j].rgbBlue,2)/(2.0*desvio_b))/(desvio_b*sqrt(2.0*PI));
+			/*media = mean(rangeGreen, 25);*/
 			/*desvio = std_deviation(rangeGreen, 25);*/
-			gauss[i][j].rgbGreen = pow(E,pow(media - matriz[i][j].rgbGreen,2)/(2.0*desvio))/(desvio*sqrt(2.0*PI));
+			gauss[i][j].rgbGreen = pow(E,pow(media_g - matriz[i][j].rgbGreen,2)/(2.0*desvio_g))/(desvio_g*sqrt(2.0*PI));
         }
     }
 	return gauss;
@@ -190,9 +229,9 @@ RGBQUAD** filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_
             for(a = 0 - (m_size/2); a < m_size/2; a++){
                 for(b = 0 - (m_size/2); b < m_size/2; b++){
                     if(i + a < 0 || j + b < 0 || i + a >= img_height || j + b >= img_width) continue;
-                    sum_r += m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j+b].rgbRed;
-                    sum_g += m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j+b].rgbGreen;
-                    sum_b += m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j+b].rgbBlue;
+                    sum_r = sum_r + m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j + b].rgbRed;
+                    sum_g = sum_g + m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j + b].rgbGreen;
+                    sum_b = sum_b + m_filter[a + (m_size/2)][b + (m_size/2)] * pix_image[i + a][j + b].rgbBlue;
                 }
             }
             new_image[i][j].rgbRed = sum_r;

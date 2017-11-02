@@ -9,7 +9,7 @@ int main(int argc, char **argv){
 	FILE *output_img;
 	PPMFILEHEADER ppm_header;
 	RGBQUAD **matriz;
-	/*RGBQUAD **bw_matriz;*/
+	RGBQUAD **bw_matriz;
 	RGBQUAD **gauss_matriz;
 	double **gauss_filter_m = matriz_filtro();
 	char outstr[50] = "";
@@ -26,9 +26,9 @@ int main(int argc, char **argv){
 	read_pixels(&matriz, ppm_header.height, ppm_header.width, input_img, ppm_header.offset);
 	fclose(input_img);
 
-	/*bw_matriz = bw_transform(matriz, ppm_header.height, ppm_header.width);*/
-	/*gauss_matriz = gauss_filter(matriz, ppm_header.height, ppm_header.width);*/
-	gauss_matriz = filter(matriz, ppm_header.height, ppm_header.width, gauss_filter_m, 5);
+	bw_matriz = bw_transform(matriz, ppm_header.height, ppm_header.width);
+	/*gauss_matriz = gauss_filter(bw_matriz, ppm_header.height, ppm_header.width);*/
+	gauss_matriz = filter(bw_matriz, ppm_header.height, ppm_header.width, gauss_filter_m, 5);
 
 	/*output_img = fopen(outstr,"wb");
 
@@ -65,8 +65,8 @@ int main(int argc, char **argv){
 
 double ** matriz_filtro(){
     int i, j;
-    double a00 = 1.0, a10 = 4.0, a20 = 7.0, a11 = 16.0, a21 = 26.0, a22 = 41.0;
-    int cnst = 273;
+    double a00 = 2.0, a10 = 4.0, a20 = 5.0, a11 = 9.0, a21 = 12.0, a22 = 15.0;
+    int cnst = 159;
    
     double **matriz = malloc(5*sizeof(double*));
     for(i = 0; i < 5; i++){

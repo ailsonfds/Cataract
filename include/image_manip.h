@@ -54,24 +54,31 @@ typedef struct tagBWQUAD{
 	unsigned char bwPix, bwReserved;
 }BWQUAD;
 
+/**
+ * BMP reader/writer
+ */
 void read_header_BMP(FILE *img, BITMAPFILEHEADER *file_header, BITMAPINFOHEADER *info_header);
-
 void write_header_BMP(FILE *img, BITMAPFILEHEADER file_header, BITMAPINFOHEADER info_header);
 
+/**
+ * PPm reader/writer
+ */
 void read_header_PPM(FILE *img, PPMFILEHEADER *header);
-
 void write_header_PPM(FILE *img, PPMFILEHEADER header);
 
-void write_pixels_PGM(BWQUAD **matriz, int height, int width, FILE *img, int offset);
+/*void write_pixels_PGM(BWQUAD **matriz, int height, int width, FILE *img, int offset);*/
 
+/**
+ * Reader/writer of pixels in image
+ */
 void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset);
-
 void write_pixels(RGBQUAD **matriz, int height, int width, FILE *img, int offset);
 
+/**
+ * Funções de transformação de imagens
+ */
 RGBQUAD** bw_transform(RGBQUAD **matriz, int height, int width);
-
 RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width);
-
 RGBQUAD** filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_filter, int m_size);
 
 /**
@@ -79,5 +86,7 @@ RGBQUAD** filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_
  */
 double mean(int *range, int n);
 double std_deviation(int *range, int n);
+double pix_mean(RGBQUAD **matriz, int height, int width, char rgb);
+double pix_std_deviation(RGBQUAD **matriz, int height, int width, char rgb);
 
 #endif /*__IMAGE_MANIP_H__*/

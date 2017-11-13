@@ -1,113 +1,5 @@
 #include "image_manip.h"
 
-void read_header_BMP(FILE *img, BITMAPFILEHEADER *file_header, BITMAPINFOHEADER *info_header){	
-    int eoftrash;
-    strcpy(file_header->bfType, "");
-    rewind(img);
-    eoftrash = fread(&(*file_header).bfType, sizeof(file_header->bfType)-1, 1, img);
-    if(strcmp(file_header->bfType, "BM") != 0){
-        printf("Not a bmp format!!\n");
-        abort();
-    }
-    eoftrash = fread(&(*file_header).bfSize, sizeof(file_header->bfSize), 1, img);
-    eoftrash = fread(&(*file_header).bfReserved1, sizeof(file_header->bfReserved1), 1, img);
-    eoftrash = fread(&(*file_header).bfReserved2, sizeof(file_header->bfReserved2), 1, img);
-    eoftrash = fread(&(*file_header).bfOffBits, sizeof(file_header->bfOffBits), 1, img);
-    eoftrash = fread(&(*info_header).biSize, sizeof(info_header->biSize), 1, img);
-    eoftrash = fread(&(*info_header).biWidth, sizeof(info_header->biWidth), 1, img);
-    eoftrash = fread(&(*info_header).biHeight, sizeof(info_header->biHeight), 1, img);
-    eoftrash = fread(&(*info_header).biPlanes, sizeof(info_header->biPlanes), 1, img);
-    eoftrash = fread(&(*info_header).biBitCount, sizeof(info_header->biBitCount), 1, img);
-    eoftrash = fread(&(*info_header).biCompression, sizeof(info_header->biCompression), 1, img);
-    eoftrash = fread(&(*info_header).biSizeImage, sizeof(info_header->biSizeImage), 1, img);
-    eoftrash = fread(&(*info_header).biXPelsPerMeter, sizeof(info_header->biXPelsPerMeter), 1, img);
-    eoftrash = fread(&(*info_header).biYPelsPerMeter, sizeof(info_header->biYPelsPerMeter), 1, img);
-    eoftrash = fread(&(*info_header).biClrUsed, sizeof(info_header->biClrUsed), 1, img);
-    eoftrash = fread(&(*info_header).biClrImportant, sizeof(info_header->biClrImportant), 1, img);
-    if(eoftrash == EOF) abort();
-
-}
-
-void write_header_BMP(FILE *img, BITMAPFILEHEADER file_header, BITMAPINFOHEADER info_header){
-	rewind(img);
-	fwrite(&file_header.bfType, sizeof(file_header.bfType)-1, 1,img);
-    fwrite(&file_header.bfSize, sizeof(file_header.bfSize), 1,img);
-    fwrite(&file_header.bfReserved1, sizeof(file_header.bfReserved1), 1,img);
-    fwrite(&file_header.bfReserved2, sizeof(file_header.bfReserved2), 1,img);
-    fwrite(&file_header.bfOffBits, sizeof(file_header.bfOffBits), 1,img);
-    fwrite(&info_header.biSize, sizeof(info_header.biSize), 1,img);
-    fwrite(&info_header.biWidth, sizeof(info_header.biWidth), 1,img);
-    fwrite(&info_header.biHeight, sizeof(info_header.biHeight), 1,img);
-    fwrite(&info_header.biPlanes, sizeof(info_header.biPlanes), 1,img);
-    fwrite(&info_header.biBitCount, sizeof(info_header.biBitCount), 1,img);
-    fwrite(&info_header.biCompression, sizeof(info_header.biCompression), 1,img);
-    fwrite(&info_header.biSizeImage, sizeof(info_header.biSizeImage), 1,img);
-    fwrite(&info_header.biXPelsPerMeter, sizeof(info_header.biXPelsPerMeter), 1,img);
-    fwrite(&info_header.biYPelsPerMeter, sizeof(info_header.biYPelsPerMeter), 1,img);
-    fwrite(&info_header.biClrUsed, sizeof(info_header.biClrUsed), 1,img);
-    fwrite(&info_header.biClrImportant, sizeof(info_header.biClrImportant), 1,img);
-}
-
-void read_header_PPM(FILE *img, PPMFILEHEADER *header){
-    int eoftrash;
-    rewind(img);
-    eoftrash = fscanf(img, "%s", (*header).type);
-    if(!(strcmp(header->type, "P6") == 0 || strcmp(header->type, "P3") == 0)){
-        printf("Not a ppm valid format!!\n");
-        abort();
-    }
-    eoftrash = fscanf(img, "%u %u %u", &(*header).height, &(*header).width, &(*header).range);
-    fgetc(img);
-    if(eoftrash == EOF) abort();
-    (*header).offset = ftell(img);
-}
-
-void write_header_PPM(FILE *img, PPMFILEHEADER header){
-    rewind(img);
-    fprintf(img, "%s\n", header.type);
-    fprintf(img, "%u %u\n%u\n", header.height, header.width, header.range);
-}
-
-void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset){
-    int i, j;
-    char type[3];
-    strcpy(type, "");
-    rewind(img);
-    i = fscanf(img, "%c%c", &type[0], &type[1]);
-    type[2] = '\0';
-    rewind(img);
-    fseek(img, offset, SEEK_SET);
-    *matriz=(RGBQUAD**)malloc(height*sizeof(RGBQUAD*));
-    for(i = 0; i < height; i++){
-        (*matriz)[i]=(RGBQUAD*)malloc(width*sizeof(RGBQUAD));
-        for(j = 0; j < width; j++){
-            (*matriz)[i][j].rgbReserved = fscanf(img,"%c%c%c",&(*matriz)[i][j].rgbRed, &(*matriz)[i][j].rgbGreen, &(*matriz)[i][j].rgbBlue);
-        }
-        if(strcmp(type,"BM") == 0){
-            j = fread(&(*matriz)[i][j].rgbReserved, width%4, 1, img);
-        }
-    }
-}
-
-void write_pixels(RGBQUAD **matriz, int height, int width, FILE *img, int offset){
-    int i, j;
-    char type[3];
-    strcpy(type, "");
-    rewind(img);
-    i = fscanf(img, "%c%c", &type[0], &type[1]);
-    type[2] = '\0';
-    rewind(img);
-    fseek(img, offset, SEEK_SET);
-    for(i = 0; i < height; i++){
-        for(j = 0; j < width; j++){
-            fprintf(img,"%c%c%c",matriz[i][j].rgbRed, matriz[i][j].rgbGreen, matriz[i][j].rgbBlue);
-        }
-        if(strcmp(type,"BM") == 0){
-            fwrite(&matriz[i][j].rgbReserved, width%4, 1, img);
-        }
-    }
-}
-
 RGBQUAD** bw_transform(RGBQUAD **matriz, int height, int width){
 	int i, j;
     int cinza;
@@ -123,25 +15,6 @@ RGBQUAD** bw_transform(RGBQUAD **matriz, int height, int width){
         }
     }
     return bw_matriz;
-}
-
-double mean(int *range, int n){
-	int i;
-	double media = 0.0;
-	for(i = 0; i < n; i++){
-		media += range[i];
-	}
-	return (media*1.0)/(n*1.0);
-}
-
-double std_deviation(int *range, int n){
-	int i;
-	double desvio = 0.0;
-	double media = mean(range, n);
-	for(i = 0; i < n; i++){
-		desvio += pow((media - range[i]),2);
-	}
-	return sqrt(desvio/((n*1.0)-1));
 }
 
 double pix_mean(RGBQUAD **matriz, int height, int width, char rgb){
@@ -214,12 +87,12 @@ RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width){
 	return gauss;
 }
 
-RGBQUAD** filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_filter, int m_size){
+RGBQUAD** conv_filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_filter, int m_size){
     int i, j, a, b;
     double sum_r, sum_g, sum_b;
     RGBQUAD** new_image = (RGBQUAD**)calloc(img_height, sizeof(RGBQUAD*));
-    FILE * error_f = fopen("error.txt","w");
-    if(error_f == NULL) abort();
+    /*FILE * error_f = fopen("error.txt","w");
+    if(error_f == NULL) abort();*/
     for(i = 0; i < img_height; i++){
         new_image[i] = (RGBQUAD*)calloc(img_width, sizeof(RGBQUAD));
         for(j = 0; j < img_width; j++){
@@ -235,11 +108,102 @@ RGBQUAD** filter(RGBQUAD **pix_image, int img_height, int img_width, double **m_
                     }
                 }
             }
+            if (sum_r > 255) sum_r = 255;
+            if (sum_g > 255) sum_g = 255;
+            if (sum_b > 255) sum_b = 255;
             new_image[i][j].rgbRed = sum_r;
             new_image[i][j].rgbGreen = sum_g;
             new_image[i][j].rgbBlue = sum_b;
-            fprintf(error_f, "%c/%.0f %c/%.0f %c/%.0f\n", new_image[i][j].rgbRed, sum_r, new_image[i][j].rgbGreen, sum_g, new_image[i][j].rgbBlue, sum_b);
+            /*fprintf(error_f, "%c/%.0f %c/%.0f %c/%.0f\n", new_image[i][j].rgbRed, sum_r, new_image[i][j].rgbGreen, sum_g, new_image[i][j].rgbBlue, sum_b);*/
         }
     }
     return new_image;
+}
+
+RGBQUAD** sobel_filter(RGBQUAD **pix_image, int img_height, int img_width){
+    int g_filter[3][3] = {{1,2,1},{0,0,0},{-1,-2,-1}};
+    int i, j, a, b, m_size = 3;
+    double sum_r, sum_g, sum_b, sum_r_x, sum_g_x, sum_b_x, sum_r_y, sum_g_y, sum_b_y;
+    RGBQUAD** new_image = (RGBQUAD**)calloc(img_height, sizeof(RGBQUAD*));
+    /*FILE * error_f = fopen("error.txt","w");
+    if(error_f == NULL) abort();*/
+    for(i = 0; i < img_height; i++){
+        new_image[i] = (RGBQUAD*)calloc(img_width, sizeof(RGBQUAD));
+        for(j = 0; j < img_width; j++){
+            sum_r = 0.0;
+            sum_g = 0.0;
+            sum_b = 0.0;
+            sum_r_x = 0.0;
+            sum_g_x = 0.0;
+            sum_b_x = 0.0;
+            sum_r_y = 0.0;
+            sum_g_y = 0.0;
+            sum_b_y = 0.0;
+            for(a = 0 - (m_size/2); a <= m_size/2; a++){
+                for(b = 0 - (m_size/2); b <= m_size/2; b++){
+                    if(i + a >= 0 && j + b >= 0 && i + a < img_height && j + b < img_width){
+                        sum_r_x += (g_filter[b + (m_size/2)][a + (m_size/2)]) * (pix_image[i + a][j + b].rgbRed);
+                        sum_g_x += (g_filter[b + (m_size/2)][a + (m_size/2)]) * (pix_image[i + a][j + b].rgbGreen);
+                        sum_b_x += (g_filter[b + (m_size/2)][a + (m_size/2)]) * (pix_image[i + a][j + b].rgbBlue);
+                        sum_r_y += (g_filter[a + (m_size/2)][b + (m_size/2)]) * (pix_image[i + a][j + b].rgbRed);
+                        sum_g_y += (g_filter[a + (m_size/2)][b + (m_size/2)]) * (pix_image[i + a][j + b].rgbGreen);
+                        sum_b_y += (g_filter[a + (m_size/2)][b + (m_size/2)]) * (pix_image[i + a][j + b].rgbBlue);
+                    }
+                }
+            }
+            sum_r = sqrt(pow(sum_r_y,2) + pow(sum_r_y,2));
+            sum_g = sqrt(pow(sum_g_y,2) + pow(sum_g_y,2));
+            sum_b = sqrt(pow(sum_b_y,2) + pow(sum_b_y,2));
+            new_image[i][j].rgbReserved = atan2(sum_r_y,sum_r_x);
+            if (sum_r > 255) sum_r = 255;
+            if (sum_g > 255) sum_g = 255;
+            if (sum_b > 255) sum_b = 255;
+            new_image[i][j].rgbRed = sum_r;
+            new_image[i][j].rgbGreen = sum_g;
+            new_image[i][j].rgbBlue = sum_b;
+            /*fprintf(error_f, "%c/%.0f %c/%.0f %c/%.0f\n", new_image[i][j].rgbRed, sum_r, new_image[i][j].rgbGreen, sum_g, new_image[i][j].rgbBlue, sum_b);*/
+        }
+    }
+    return new_image;
+}
+
+RGBQUAD** threshold(RGBQUAD **matriz, int height, int width){
+    int i, j;
+    RGBQUAD** new_image = (RGBQUAD**)calloc(height, sizeof(RGBQUAD*));
+    for(i = 0; i < height; i++){
+        new_image[i] = (RGBQUAD*)calloc(width, sizeof(RGBQUAD));
+        for(j = 0; j < width; j++){
+            if (matriz[i][j].rgbRed > 20){
+                new_image[i][j].rgbRed = 255;
+                new_image[i][j].rgbBlue = 255;
+                new_image[i][j].rgbGreen = 255;
+            }else{
+                new_image[i][j].rgbRed = 0;
+                new_image[i][j].rgbBlue = 0;
+                new_image[i][j].rgbGreen = 0;
+            }
+        }
+    }
+    return new_image;
+}
+
+int*** circle_detection(RGBQUAD **matriz, int height, int width, int max_r, int min_r){
+    int i, j, t, r, a, b;
+    int ***matriz_a = (int***)calloc(height, sizeof(int**));
+    for(i = min_r; i < height - min_r; i++){
+        matriz_a[i] = (int**)calloc(width, sizeof(int*));
+        for(j = min_r; j < width - min_r; j++){
+            matriz_a[i][j] = (int*)calloc(max_r + 1, sizeof(int));
+            if (matriz[i][j].rgbRed == 255){
+                for(t = 0 ; t < 360; t++){
+                    for(r = min_r; r <= max_r; r++){
+                        a = i - r*cos(t*PI/180);
+                        b = j - r*sin(t*PI/180);
+                        matriz_a[a][b][r]++;
+                    }
+                }
+            }
+        }
+    }
+    return matriz_a;
 }

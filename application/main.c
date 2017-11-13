@@ -11,6 +11,8 @@ int main(int argc, char **argv){
 	RGBQUAD **matriz;
 	RGBQUAD **bw_matriz;
 	RGBQUAD **gauss_matriz;
+	RGBQUAD **sobel_matriz;
+	int*** matriz_centers;
 	double **gauss_filter_m = matriz_filtro();
 	char outstr[50] = "";
 
@@ -28,7 +30,12 @@ int main(int argc, char **argv){
 
 	bw_matriz = bw_transform(matriz, ppm_header.height, ppm_header.width);
 	/*gauss_matriz = gauss_filter(bw_matriz, ppm_header.height, ppm_header.width);*/
-	gauss_matriz = filter(bw_matriz, ppm_header.height, ppm_header.width, gauss_filter_m, 5);
+	gauss_matriz = conv_filter(bw_matriz, ppm_header.height, ppm_header.width, gauss_filter_m, 5);
+	/*gauss_matriz = conv_filter(gauss_matriz, ppm_header.height, ppm_header.width, gauss_filter_m, 5);*/
+	sobel_matriz = sobel_filter(gauss_matriz, ppm_header.height, ppm_header.width);
+	/*sobel_matriz = sobel_filter(sobel_matriz, ppm_header.height, ppm_header.width);*/
+	sobel_matriz = threshold(sobel_matriz, ppm_header.height, ppm_header.width);
+	matriz_centers = circle_detection(sobel_matriz, height, width, max(height,width)/2, min(height,width)*0.10);
 
 	/*output_img = fopen(outstr,"wb");
 
@@ -41,7 +48,7 @@ int main(int argc, char **argv){
 	write_pixels(bw_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
 	fclose(output_img);*/
 
-	for(i = 0; i < 50; i++){
+	/*for(i = 0; i < 50; i++){
 		outstr[i] = '\0';
 	}
 	strncpy(outstr, argv[1], strlen(argv[1])-4);
@@ -56,9 +63,34 @@ int main(int argc, char **argv){
 
 	write_header_PPM(output_img, ppm_header);
 	write_pixels(gauss_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
+	fclose(output_img);*/
+
+	for(i = 0; i < 50; i++){
+		outstr[i] = '\0';
+	}
+	strncpy(outstr, argv[1], strlen(argv[1])-4);
+	strcat(outstr, "_sobel.ppm");
+
+	output_img = fopen(outstr,"wb");
+
+	if(output_img == NULL){
+		fprintf(stderr, "File not opened!!\n");
+		return 0;
+	}
+
+	write_header_PPM(output_img, ppm_header);
+	write_pixels(sobel_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
 	fclose(output_img);
 
+	for (r = 0; r < max(height,width)/2; r++){
+		for (i = 0; i < height; i++){
+			for (j = 0; j < width; j++){
+				printf("%d ", );
+			}
+		}
 
+		printf("%d\n", r + min(height,width)*0.10);
+	}
 
 	return EXIT_SUCCESS;
 }

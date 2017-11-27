@@ -4,7 +4,7 @@ double ** matriz_filtro();
 double ** matriz_filtro_gaussiano(double desvio);
 
 int main(int argc, char **argv){
-	int i;
+	int i, j, r;
 	FILE *input_img = fopen(argv[1], "rb");
 	FILE *output_img;
 	PPMFILEHEADER ppm_header;
@@ -35,9 +35,9 @@ int main(int argc, char **argv){
 	sobel_matriz = sobel_filter(gauss_matriz, ppm_header.height, ppm_header.width);
 	/*sobel_matriz = sobel_filter(sobel_matriz, ppm_header.height, ppm_header.width);*/
 	sobel_matriz = threshold(sobel_matriz, ppm_header.height, ppm_header.width);
-	matriz_centers = circle_detection(sobel_matriz, height, width, max(height,width)/2, min(height,width)*0.10);
+	/*matriz_centers = circle_detection(sobel_matriz, ppm_header.height, ppm_header.width, max(ppm_header.height,ppm_header.width)/2, min(ppm_header.height,ppm_header.width)*0.10);*/
 
-	/*output_img = fopen(outstr,"wb");
+	output_img = fopen(outstr,"wb");
 
 	if(output_img == NULL){
 		fprintf(stderr, "File not opened!!\n");
@@ -46,9 +46,9 @@ int main(int argc, char **argv){
 
 	write_header_PPM(output_img, ppm_header);
 	write_pixels(bw_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
-	fclose(output_img);*/
+	fclose(output_img);
 
-	/*for(i = 0; i < 50; i++){
+	for(i = 0; i < 50; i++){
 		outstr[i] = '\0';
 	}
 	strncpy(outstr, argv[1], strlen(argv[1])-4);
@@ -63,7 +63,7 @@ int main(int argc, char **argv){
 
 	write_header_PPM(output_img, ppm_header);
 	write_pixels(gauss_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
-	fclose(output_img);*/
+	fclose(output_img);
 
 	for(i = 0; i < 50; i++){
 		outstr[i] = '\0';
@@ -82,14 +82,14 @@ int main(int argc, char **argv){
 	write_pixels(sobel_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
 	fclose(output_img);
 
-	for (r = 0; r < max(height,width)/2; r++){
-		for (i = 0; i < height; i++){
-			for (j = 0; j < width; j++){
-				printf("%d ", );
+	for (r = 0; r < max(ppm_header.height,ppm_header.width)/2; r++){
+		for (i = 0; i < ppm_header.height; i++){
+			for (j = 0; j < ppm_header.width; j++){
+				/*printf("%d ", matriz_centers[i][j][r]);*/
 			}
 		}
 
-		printf("%d\n", r + min(height,width)*0.10);
+		/*printf("%f\n", r + min(ppm_header.height,ppm_header.width)*0.10);*/
 	}
 
 	return EXIT_SUCCESS;

@@ -57,9 +57,9 @@ RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width){
     double desvio_r = 10.0, desvio_g = 10.0, desvio_b = 10.0;
     RGBQUAD** gauss = (RGBQUAD**)calloc(height, sizeof(RGBQUAD*));
 
-    /*desvio_r = pix_std_deviation(matriz, height, width, 'r');
+    desvio_r = pix_std_deviation(matriz, height, width, 'r');
     desvio_g = pix_std_deviation(matriz, height, width, 'g');
-    desvio_b = pix_std_deviation(matriz, height, width, 'b');*/
+    desvio_b = pix_std_deviation(matriz, height, width, 'b');
 
     for(i = 0; i < height; i++){
         gauss[i] = (RGBQUAD*)calloc(width, sizeof(RGBQUAD));
@@ -73,14 +73,14 @@ RGBQUAD** gauss_filter(RGBQUAD **matriz, int height, int width){
 					}
 				}
 			}*/
-			/*media = mean(rangeRed, 25);*/
-			/*desvio = std_deviation(rangeRed, 25);*/
+			/*media_r = mean(rangeRed, 25);
+			desvio_r = std_deviation(rangeRed, 25);*/
 			gauss[i][j].rgbRed = pow(E,pow(media_r - matriz[i][j].rgbRed,2)/(2.0*desvio_r))/(desvio_r*sqrt(2.0*PI));
-			/*media = mean(rangeBlue, 25);*/
-			/*desvio = std_deviation(rangeBlue, 25);*/
+			/*media_b = mean(rangeBlue, 25);
+			desvio_b = std_deviation(rangeBlue, 25);*/
 			gauss[i][j].rgbBlue = pow(E,pow(media_b - matriz[i][j].rgbBlue,2)/(2.0*desvio_b))/(desvio_b*sqrt(2.0*PI));
-			/*media = mean(rangeGreen, 25);*/
-			/*desvio = std_deviation(rangeGreen, 25);*/
+			/*media_g = mean(rangeGreen, 25);
+			desvio_g = std_deviation(rangeGreen, 25);*/
 			gauss[i][j].rgbGreen = pow(E,pow(media_g - matriz[i][j].rgbGreen,2)/(2.0*desvio_g))/(desvio_g*sqrt(2.0*PI));
         }
     }
@@ -169,11 +169,16 @@ RGBQUAD** sobel_filter(RGBQUAD **pix_image, int img_height, int img_width){
 
 RGBQUAD** threshold(RGBQUAD **matriz, int height, int width){
     int i, j;
+    int thres_i = max_in_range(histogram(matriz, height, width),THRES_RANGE);
+    int thres = (256/THRES_RANGE)*thres_i;
+    /*double media_r = pix_mean(matriz, height, width, 'r');*/
+    /*double desvio_r = pix_std_deviation(matriz, height, width, 'r');*/
     RGBQUAD** new_image = (RGBQUAD**)calloc(height, sizeof(RGBQUAD*));
+    printf("%d\n", thres);
     for(i = 0; i < height; i++){
         new_image[i] = (RGBQUAD*)calloc(width, sizeof(RGBQUAD));
         for(j = 0; j < width; j++){
-            if (matriz[i][j].rgbRed > 20){
+            if (matriz[i][j].rgbRed > thres){
                 new_image[i][j].rgbRed = 255;
                 new_image[i][j].rgbBlue = 255;
                 new_image[i][j].rgbGreen = 255;
@@ -185,6 +190,23 @@ RGBQUAD** threshold(RGBQUAD **matriz, int height, int width){
         }
     }
     return new_image;
+}
+
+int *histogram(RGBQUAD **pix_image, int img_height, int img_width){
+    int i, j, k, c;
+    int *vet = calloc(THRES_RANGE, sizeof(int));
+    for (k = 0; k < THRES_RANGE; k++){
+        for (c = 0; c < 256/THRES_RANGE; c++){
+            for (i = 0; i < img_height; i++){
+                for (j = 0; j < img_height; j++){
+                    if (c*k + c == pix_image[i][j].rgbRed || c*k + c == pix_image[i][j].rgbBlue || c*k + c == pix_image[i][j].rgbGreen){
+                        vet[k]++;
+                    }
+                }
+            }
+        }
+    }
+    return vet;
 }
 
 int*** circle_detection(RGBQUAD **matriz, int height, int width, int max_r, int min_r){

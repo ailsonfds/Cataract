@@ -8,5 +8,8 @@
 
 double mean(int *range, int n);
 double std_deviation(int *range, int n);
+int max_in_range(int *range, int n);
+int max(int a, int b);
+int min(int a, int b);
 
 #endif /** __MATH_UTILS_H__ */

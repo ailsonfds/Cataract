@@ -18,3 +18,23 @@ double std_deviation(int *range, int n){
 	}
 	return sqrt(desvio/((n*1.0)-1));
 }
+
+int max_in_range(int *range, int n){
+	int i, maior = 0;
+	for (i = 0; i < n; ++i){
+		if(range[i]>maior)
+			maior = i;
+	}
+	return maior;
+}
+
+int max(int a, int b){
+	if(a > b)
+		return a;
+	return b;
+}
+int min(int a, int b){
+	if(a < b)
+		return a;
+	return b;
+}

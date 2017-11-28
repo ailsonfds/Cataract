@@ -76,17 +76,18 @@ void read_header_PPM(FILE *img, PPMFILEHEADER *header){
     fgetc(img);
     if(eoftrash == EOF) abort();
     (*header).offset = ftell(img);
-    printf("%s\n%d %d\n%d\n%p\n", header->type, header->width, header->height, header->range, header->offset);
+    printf("%s\n%u %u\n%u\n%p\n", header->type, header->width, header->height, header->range, (void *)header->offset);
 }
 
 void write_header_PPM(FILE *img, PPMFILEHEADER header){
     rewind(img);
+    if (strcmp(header.type,"P3") == 0) strcpy(header.type, "P6");
     fprintf(img, "%s\n", header.type);
     fprintf(img, "%u %u\n%u\n", header.width, header.height, header.range);
 }
 
 void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset){
-    int i, j;
+    int i, j, red, green, blue;
     char type[3];
     strcpy(type, "");
     rewind(img);
@@ -95,17 +96,23 @@ void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset
     rewind(img);
     fseek(img, offset, SEEK_SET);
     *matriz=(RGBQUAD**)malloc(height*sizeof(RGBQUAD*));
+    for(i = 0; i < height; i++)
+            (*matriz)[i]=(RGBQUAD*)malloc(width*sizeof(RGBQUAD));
+
     if (strcmp(type,"P3") == 0){
         for(i = 0; i < height; i++){
-            (*matriz)[i]=(RGBQUAD*)malloc(width*sizeof(RGBQUAD));
             for(j = 0; j < width; j++){
-                (*matriz)[i][j].rgbReserved = fscanf(img,"%c\n%c\n%c\n",&(*matriz)[i][j].rgbRed, &(*matriz)[i][j].rgbGreen, &(*matriz)[i][j].rgbBlue);
+                (*matriz)[i][j].rgbReserved = fscanf(img,"%d", &red);
+                (*matriz)[i][j].rgbReserved = fscanf(img,"%d", &green);
+                (*matriz)[i][j].rgbReserved = fscanf(img,"%d", &blue);
+                (*matriz)[i][j].rgbRed = red;
+                (*matriz)[i][j].rgbGreen = green;
+                (*matriz)[i][j].rgbBlue = blue;
             }
         }
     }
     else if (strcmp(type,"P6") == 0){
         for(i = 0; i < height; i++){
-            (*matriz)[i]=(RGBQUAD*)malloc(width*sizeof(RGBQUAD));
             for(j = 0; j < width; j++){
                 (*matriz)[i][j].rgbReserved = fscanf(img,"%c%c%c",&(*matriz)[i][j].rgbRed, &(*matriz)[i][j].rgbGreen, &(*matriz)[i][j].rgbBlue);
             }
@@ -113,7 +120,6 @@ void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset
     }
     else if(strcmp(type,"BM") == 0){
         for(i = 0; i < height; i++){
-            (*matriz)[i]=(RGBQUAD*)malloc(width*sizeof(RGBQUAD));
             for(j = 0; j < width; j++){
                 (*matriz)[i][j].rgbReserved = fscanf(img,"%c%c%c",&(*matriz)[i][j].rgbRed, &(*matriz)[i][j].rgbGreen, &(*matriz)[i][j].rgbBlue);
             }
@@ -166,6 +172,7 @@ void get_comment_ppm(FILE *img){
 
     while(is_hash == '#'){
         read_success = fgets(trash, 200, img);
+        is_hash = fgetc(img); /* caṕturando \n */
         if(read_success == NULL) abort();
         is_hash = fgetc(img);
     }

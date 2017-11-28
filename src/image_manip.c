@@ -169,16 +169,15 @@ RGBQUAD** sobel_filter(RGBQUAD **pix_image, int img_height, int img_width){
 
 RGBQUAD** threshold(RGBQUAD **matriz, int height, int width){
     int i, j;
-    int thres_i = max_in_range(histogram(matriz, height, width),THRES_RANGE);
-    int thres = (256/THRES_RANGE)*thres_i;
-    /*double media_r = pix_mean(matriz, height, width, 'r');*/
-    /*double desvio_r = pix_std_deviation(matriz, height, width, 'r');*/
+    /*int thres_i = max_in_range(histogram(matriz, height, width),THRES_RANGE);
+    int thres = (256/THRES_RANGE)*thres_i;*/
+    double media = pix_mean(matriz, height, width, 'r');
+    double desvio = pix_std_deviation(matriz, height, width, 'r');
     RGBQUAD** new_image = (RGBQUAD**)calloc(height, sizeof(RGBQUAD*));
-    printf("%d\n", thres);
     for(i = 0; i < height; i++){
         new_image[i] = (RGBQUAD*)calloc(width, sizeof(RGBQUAD));
         for(j = 0; j < width; j++){
-            if (matriz[i][j].rgbRed > thres){
+            if (matriz[i][j].rgbRed > media - desvio){
                 new_image[i][j].rgbRed = 255;
                 new_image[i][j].rgbBlue = 255;
                 new_image[i][j].rgbGreen = 255;
@@ -211,17 +210,26 @@ int *histogram(RGBQUAD **pix_image, int img_height, int img_width){
 
 int*** circle_detection(RGBQUAD **matriz, int height, int width, int max_r, int min_r){
     int i, j, t, r, a, b;
-    int ***matriz_a = (int***)calloc(height, sizeof(int**));
-    for(i = min_r; i < height - min_r; i++){
+    int ***matriz_a;
+
+    matriz_a = (int***)calloc(height, sizeof(int**));
+    for(i = 0; i < height; i++){
         matriz_a[i] = (int**)calloc(width, sizeof(int*));
-        for(j = min_r; j < width - min_r; j++){
+        for(j = 0; j < width; j++){
             matriz_a[i][j] = (int*)calloc(max_r + 1, sizeof(int));
+        }
+    }
+
+    for(i = min_r; i < height - min_r; i++){
+        for(j = min_r; j < width - min_r; j++){
             if (matriz[i][j].rgbRed == 255){
                 for(t = 0 ; t < 360; t++){
                     for(r = min_r; r <= max_r; r++){
                         a = i - r*cos(t*PI/180);
                         b = j - r*sin(t*PI/180);
-                        matriz_a[a][b][r]++;
+                        if (a > 0 && b > 0 && a < height && b < width){
+                            matriz_a[a][b][r]++;
+                        }
                     }
                 }
             }

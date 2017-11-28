@@ -79,4 +79,6 @@ void write_pixels(RGBQUAD **matriz, int height, int width, FILE *img, int offset
  */
 RGBQUAD** copy(RGBQUAD **matriz, int height, int width);
 
+void get_comment_ppm(FILE *img);
+
 #endif /** __IMAGE_UTILS_H__ */

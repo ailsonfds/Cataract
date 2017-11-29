@@ -4,7 +4,7 @@ double ** matriz_filtro(int ordem, double desvio);
 double ** matriz_filtro_gaussiano(double desvio);
 
 int main(int argc, char **argv){
-	int i, j, r;
+	int i/*, j, r*/;
 	FILE *input_img;
 	FILE *output_img;
 	PPMFILEHEADER ppm_header;
@@ -12,7 +12,7 @@ int main(int argc, char **argv){
 	RGBQUAD **bw_matriz;
 	RGBQUAD **gauss_matriz;
 	RGBQUAD **sobel_matriz;
-	int*** matriz_centers;
+	int* matriz_centers;
 	double **gauss_filter_m;
 	int gauss_ordem = 5;
 	char outstr[50] = "";
@@ -29,18 +29,24 @@ int main(int argc, char **argv){
 
 	read_header_PPM(input_img, &ppm_header);
 	read_pixels(&matriz, ppm_header.height, ppm_header.width, input_img, ppm_header.offset);
+	if (ppm_header.has_comment == 1){
+		output_img = tmpfile();
+		write_header_PPM(output_img, ppm_header);
+		read_header_PPM(output_img, &ppm_header);
+		fclose(output_img);
+	}
 	fclose(input_img);
 
 	bw_matriz = bw_transform(matriz, ppm_header.height, ppm_header.width);
 	/*gauss_matriz = gauss_filter(bw_matriz, ppm_header.height, ppm_header.width);*/
 	gauss_filter_m = matriz_filtro(gauss_ordem, 1);
 	gauss_matriz = conv_filter(bw_matriz, ppm_header.height, ppm_header.width, gauss_filter_m, gauss_ordem);
-	/*gauss_matriz = conv_filter(gauss_matriz, ppm_header.height, ppm_header.width, gauss_filter_m, 5);*/
+	/*gauss_matriz = conv_filter(gauss_matriz, ppm_header.height, ppm_header.width, gauss_filter_m, gauss_ordem);*/
 	sobel_matriz = sobel_filter(gauss_matriz, ppm_header.height, ppm_header.width);
 	/*sobel_matriz = sobel_filter(sobel_matriz, ppm_header.height, ppm_header.width);*/
 	sobel_matriz = threshold(sobel_matriz, ppm_header.height, ppm_header.width);
 
-	output_img = fopen(outstr,"w");
+	output_img = fopen(outstr,"w+");
 
 	if(output_img == NULL){
 		fprintf(stderr, "File not opened!!\n");
@@ -85,12 +91,13 @@ int main(int argc, char **argv){
 	write_pixels(sobel_matriz, ppm_header.height, ppm_header.width, output_img, ppm_header.offset);
 	fclose(output_img);
 
-	/*matriz_centers = circle_detection(sobel_matriz, ppm_header.height, ppm_header.width, min(ppm_header.height,ppm_header.width)/2, min(ppm_header.height,ppm_header.width)*0.10);
+	matriz_centers = circle_detection(sobel_matriz, ppm_header.height, ppm_header.width, min(ppm_header.height,ppm_header.width)/2, min(ppm_header.height,ppm_header.width)*0.10);
+	printf("%d\n", matriz_centers[0]);
 
-	for (r = 0; r < max(ppm_header.height,ppm_header.width)/2; r++){
+	/*for (r = 0; r < max(ppm_header.height,ppm_header.width)/2; r++){
 		for (i = 0; i < ppm_header.height; i++){
 			for (j = 0; j < ppm_header.width; j++){
-				printf("%d ", matriz_centers[i][j][r]);
+				printf("%d ", matriz_centers[i*ppm_header.width*max(ppm_header.height,ppm_header.width)/2 + j*max(ppm_header.height,ppm_header.width)/2 +r]);
 			}
 		}
 

@@ -172,12 +172,12 @@ RGBQUAD** threshold(RGBQUAD **matriz, int height, int width){
     /*int thres_i = max_in_range(histogram(matriz, height, width),THRES_RANGE);
     int thres = (256/THRES_RANGE)*thres_i;*/
     double media = pix_mean(matriz, height, width, 'r');
-    double desvio = pix_std_deviation(matriz, height, width, 'r');
+    /*double desvio = pix_std_deviation(matriz, height, width, 'r');*/
     RGBQUAD** new_image = (RGBQUAD**)calloc(height, sizeof(RGBQUAD*));
     for(i = 0; i < height; i++){
         new_image[i] = (RGBQUAD*)calloc(width, sizeof(RGBQUAD));
         for(j = 0; j < width; j++){
-            if (matriz[i][j].rgbRed > media - desvio){
+            if (matriz[i][j].rgbRed > media*0.75){
                 new_image[i][j].rgbRed = 255;
                 new_image[i][j].rgbBlue = 255;
                 new_image[i][j].rgbGreen = 255;
@@ -208,17 +208,12 @@ int *histogram(RGBQUAD **pix_image, int img_height, int img_width){
     return vet;
 }
 
-int*** circle_detection(RGBQUAD **matriz, int height, int width, int max_r, int min_r){
-    int i, j, t, r, a, b;
-    int ***matriz_a;
+int* circle_detection(RGBQUAD **matriz, int height, int width, int max_r, int min_r){
+    int i, j, t, r, a = 0, b = 0;
+    int *matriz_a;
+    int max = 0, max_x = 0, max_y = 0, max_raio = 0;
 
-    matriz_a = (int***)calloc(height, sizeof(int**));
-    for(i = 0; i < height; i++){
-        matriz_a[i] = (int**)calloc(width, sizeof(int*));
-        for(j = 0; j < width; j++){
-            matriz_a[i][j] = (int*)calloc(max_r + 1, sizeof(int));
-        }
-    }
+    matriz_a = (int*)calloc(height*width*max_r, sizeof(int));
 
     for(i = min_r; i < height - min_r; i++){
         for(j = min_r; j < width - min_r; j++){
@@ -228,12 +223,29 @@ int*** circle_detection(RGBQUAD **matriz, int height, int width, int max_r, int 
                         a = i - r*cos(t*PI/180);
                         b = j - r*sin(t*PI/180);
                         if (a > 0 && b > 0 && a < height && b < width){
-                            matriz_a[a][b][r]++;
+                            matriz_a[(a*width*max_r)+(b*max_r)+r]++;
                         }
                     }
                 }
             }
         }
     }
+
+
+    for(r = min_r; r <= max_r; r++){
+        for(i = min_r; i < height - min_r; i++){
+            for(j = min_r; j < width - min_r; j++){
+                if (matriz_a[(a*width*max_r)+(b*max_r)+r] > max){
+                    max = matriz_a[(a*width*max_r)+(b*max_r)+r];
+                    max_x = i;
+                    max_y = j;
+                    max_raio = r;
+                }
+            }
+        }
+    }
+
+    printf("valor=%d x=%d y=%d raio=%d\n", max, max_x, max_y, max_raio);
+
     return matriz_a;
 }

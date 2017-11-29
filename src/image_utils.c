@@ -71,10 +71,10 @@ void read_header_PPM(FILE *img, PPMFILEHEADER *header){
         printf("Not a ppm valid format!!\n");
         abort();
     }
-    get_comment_ppm(img);
+    header->has_comment = 0;
+    get_comment_ppm(img, &header->has_comment);
     eoftrash = fscanf(img, "%u %u %u", &(*header).width, &(*header).height, &(*header).range);
-    fgetc(img);
-    if(eoftrash == EOF) abort();
+    if((eoftrash | fgetc(img)) == EOF) abort();
     (*header).offset = ftell(img);
     printf("%s\n%u %u\n%u\n%p\n", header->type, header->width, header->height, header->range, (void *)header->offset);
 }
@@ -89,6 +89,7 @@ void write_header_PPM(FILE *img, PPMFILEHEADER header){
 void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset){
     int i, j, red, green, blue;
     char type[3];
+    FILE *err_f = fopen("error.txt","w");
     strcpy(type, "");
     rewind(img);
     i = fscanf(img, "%c%c", &type[0], &type[1]);
@@ -105,9 +106,10 @@ void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset
                 (*matriz)[i][j].rgbReserved = fscanf(img,"%d", &red);
                 (*matriz)[i][j].rgbReserved = fscanf(img,"%d", &green);
                 (*matriz)[i][j].rgbReserved = fscanf(img,"%d", &blue);
-                (*matriz)[i][j].rgbRed = red;
-                (*matriz)[i][j].rgbGreen = green;
-                (*matriz)[i][j].rgbBlue = blue;
+                (*matriz)[i][j].rgbRed = (unsigned char)red;
+                (*matriz)[i][j].rgbGreen = (unsigned char)green;
+                (*matriz)[i][j].rgbBlue = (unsigned char)blue;
+                fprintf(err_f, "%c %c %c\n", (*matriz)[i][j].rgbRed, (*matriz)[i][j].rgbGreen, (*matriz)[i][j].rgbBlue);
             }
         }
     }
@@ -161,7 +163,7 @@ RGBQUAD** copy(RGBQUAD **matriz, int height, int width){
     return new_image;
 }
 
-void get_comment_ppm(FILE *img){
+void get_comment_ppm(FILE *img, int *comment){
     char is_hash = fgetc(img);
     char trash[200];
     char *read_success;
@@ -169,12 +171,11 @@ void get_comment_ppm(FILE *img){
     if (is_hash == '\n'){
         is_hash = fgetc(img);
     }
-
     while(is_hash == '#'){
+        *comment = 1;
         read_success = fgets(trash, 200, img);
-        is_hash = fgetc(img); /* caṕturando \n */
+        is_hash = fgetc(img); /* capturando \n */
         if(read_success == NULL) abort();
-        is_hash = fgetc(img);
     }
     fseek(img, -1, SEEK_CUR);
 }

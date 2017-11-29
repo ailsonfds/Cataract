@@ -40,6 +40,7 @@ typedef struct tagBITMAPINFO{
 
 typedef struct tagPPMFILEHEADER{
 	char type[3];
+	int has_comment;
 	unsigned int height;
 	unsigned int width;
 	unsigned int range;
@@ -79,6 +80,6 @@ void write_pixels(RGBQUAD **matriz, int height, int width, FILE *img, int offset
  */
 RGBQUAD** copy(RGBQUAD **matriz, int height, int width);
 
-void get_comment_ppm(FILE *img);
+void get_comment_ppm(FILE *img, int *comment);
 
 #endif /** __IMAGE_UTILS_H__ */

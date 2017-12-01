@@ -76,7 +76,7 @@ void read_header_PPM(FILE *img, PPMFILEHEADER *header){
     eoftrash = fscanf(img, "%u %u %u", &(*header).width, &(*header).height, &(*header).range);
     if((eoftrash | fgetc(img)) == EOF) abort();
     (*header).offset = ftell(img);
-    printf("%s\n%u %u\n%u\n%p\n", header->type, header->width, header->height, header->range, (void *)header->offset);
+    /*printf("%s\n%u %u\n%u\n%p\n", header->type, header->width, header->height, header->range, (void *)header->offset);*/
 }
 
 void write_header_PPM(FILE *img, PPMFILEHEADER header){
@@ -161,6 +161,13 @@ RGBQUAD** copy(RGBQUAD **matriz, int height, int width){
         }
     }
     return new_image;
+}
+
+void dealloc(RGBQUAD **matriz, int height) {
+    int i;
+    for(i = height-1; i >= 0; i--)
+        free(matriz[i]);
+    free(matriz);
 }
 
 void get_comment_ppm(FILE *img, int *comment){

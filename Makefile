@@ -4,6 +4,14 @@ INCLUDEDIR = include
 APPDIR = application
 OBJDIR = build
 TESTDIR = test
+IMGDIR = images
+INPUT = input
+OUTPUT = output
+
+PIC1 = Catarata
+PIC2 = Catarata2
+PIC3 = Normal
+PIC4 = Normal2
 
 CC = gcc
 CFLAGS = -O3 -Wall -ansi -pedantic -I $(INCLUDEDIR) -lm
@@ -35,8 +43,11 @@ $(TESTDIR)/t_%: $(TESTDIR)/t_%.c $(OBJS)
 	$(CC) -o $@ $< $(OBJS) $(CFLAGS) $(LDFLAGS)
 	$@
 
-execute:
-	./$(BIN)
+exec: $(BIN)
+	./$(BIN) -i $(IMGDIR)/$(INPUT)/$(PIC1).ppm -s $(IMGDIR)/$(OUTPUT)/$(PIC1).ppm
+	./$(BIN) -i $(IMGDIR)/$(INPUT)/$(PIC2).ppm -s $(IMGDIR)/$(OUTPUT)/$(PIC2).ppm
+	./$(BIN) -i $(IMGDIR)/$(INPUT)/$(PIC3).ppm -s $(IMGDIR)/$(OUTPUT)/$(PIC3).ppm
+	./$(BIN) -i $(IMGDIR)/$(INPUT)/$(PIC4).ppm -s $(IMGDIR)/$(OUTPUT)/$(PIC4).ppm
 
 clean:
 	rm -f $(BIN) $(OBJS) $(APPOBJ)

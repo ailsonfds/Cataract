@@ -71,6 +71,8 @@ void write_header_PPM(FILE *img, PPMFILEHEADER header);
 void read_pixels(RGBQUAD ***matriz, int height, int width, FILE *img, int offset);
 void write_pixels(RGBQUAD **matriz, int height, int width, FILE *img, int offset);
 
+void dealloc(RGBQUAD **matriz, int height);
+
 /**
  * Copy an bidimensinal array of RGBQUAD
  * @param matriz The source

@@ -39,12 +39,14 @@
 
 _catarata_ é capaz de processar um conjunto de parâmetros, como indicado a  seguir:
 - _-i_ _input-image_ a  imagem de entrada a  ser processada.
-- _-f_ _input-image-format_ indica o  formato da imagem de entrada (bmp ou ppm).
+	<aside class="notice">
+	Não me responsabilizo pelo diagnóstico em imagens que não sejam ppm.
+	</aside>
 - _-o_ _diagnose-file_ (opcional) indica o nome do arquivo texto contendo o diagnóstico. Caso opte por não adicionar essa opção, o diagnostico será impresso na saída padrão.
 
 Exemplo de execução: 
 
-	./catarata -i imagem.bmp -f bmp -o diagnostico.txt
+	./catarata -i imagem.ppm -o diagnostico.txt
 
 O arquivo de diagnóstico conterá ao final da execução:
 1. Diagnóstico Geral: Com/Sem catarata.

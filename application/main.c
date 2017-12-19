@@ -11,9 +11,11 @@ int main(int argc, char **argv){
 	char outstr[50] = "";
 	time_t begin_time, end_time;
 
-	input_img = fopen(argv[2], "rb");
+	decode(argc,argv);
+	
+	input_img = fopen(img_f_name, "rb");
 
-	strncpy(outstr, argv[2], strlen(argv[2])-4);
+	strncpy(outstr, img_f_name, strlen(img_f_name)-4);
 	strcat(outstr, "_bw.ppm");
 
 	if(input_img == NULL){
@@ -32,7 +34,7 @@ int main(int argc, char **argv){
 	fclose(input_img);
 
 	time(&begin_time);
-	make_diagnoses(ppm_header, matriz, argv[4]);
+	make_diagnoses(ppm_header, matriz, img_f_name, diag_f_name);
 	time(&end_time);
 	printf("%.f s\n", difftime(end_time,begin_time));
 

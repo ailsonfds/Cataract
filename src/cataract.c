@@ -23,6 +23,7 @@ RGBQUAD** apply_necessary_filters(RGBQUAD** img, int height, int width, char* ou
 	bw_matriz = bw_transform(img, height, width);
 
     strncpy(tmpstr,output_name, strlen(output_name)-4);
+    tmpstr[strlen(output_name)-4] = '\0';
     strcat(tmpstr,"_bw.ppm");
     output_img = fopen(tmpstr, "w");
     if(output_img != NULL){
@@ -36,6 +37,7 @@ RGBQUAD** apply_necessary_filters(RGBQUAD** img, int height, int width, char* ou
 
     strcpy(tmpstr,"\0");
     strncpy(tmpstr,output_name, strlen(output_name)-4);
+    tmpstr[strlen(output_name)-4] = '\0';
     strcat(tmpstr,"_gauss.ppm");
     output_img = fopen(tmpstr, "w");
     if(output_img != NULL){
@@ -48,6 +50,7 @@ RGBQUAD** apply_necessary_filters(RGBQUAD** img, int height, int width, char* ou
 
     strcpy(tmpstr,"\0");
     strncpy(tmpstr,output_name, strlen(output_name)-4);
+    tmpstr[strlen(output_name)-4] = '\0';
     strcat(tmpstr,"_sobel.ppm");
     output_img = fopen(tmpstr, "w");
     if(output_img != NULL){
@@ -60,6 +63,7 @@ RGBQUAD** apply_necessary_filters(RGBQUAD** img, int height, int width, char* ou
 
     strcpy(tmpstr,"\0");
     strncpy(tmpstr,output_name, strlen(output_name)-4);
+    tmpstr[strlen(output_name)-4] = '\0';
     strcat(tmpstr,"_bin.ppm");
     output_img = fopen(tmpstr, "w");
     if(output_img != NULL){
@@ -97,6 +101,7 @@ int* circle_detection(RGBQUAD** img, int height, int width, int max_r, int min_r
             printf("%.2f%%\r", 100.0*(i - min_r)/(height - (2*min_r)));
         }
     }
+    printf("Concluido\n");
     return matriz_a;
 }
 
@@ -128,7 +133,7 @@ void make_votation(RGBQUAD** img, int height, int width, int max_r, int min_r, i
             printf("%.2f%%\r", 100.0*(r - min_r)/((max_r- min_r)));
         }
     }
-    printf("max=%d\n", max);
+    printf("Concluido\n");
     free(matriz_a);
 }
 
@@ -159,15 +164,23 @@ RGBQUAD** segmented_image(RGBQUAD** img, int height, int width, int r_center, in
     return segmentado;
 }
 
-void make_diagnoses(PPMFILEHEADER ppm_header, RGBQUAD** img, char* output_name){
+void make_diagnoses(PPMFILEHEADER ppm_header, RGBQUAD** img, char *img_name, char* output_name){
 	int i, j, sum, total;
 	double diagnose;
-	FILE* output_img;
+	FILE* output_img, *diagnose_file;
 	int height = ppm_header.height, width = ppm_header.width;
 	int max_r = min(height,width)*0.50, min_r = min(height,width)*0.10;
 	int x_c, y_c, r_c, *matriz_a;
     RGBQUAD** copia_orig = copy(img,height,width);
-	RGBQUAD** bin = apply_necessary_filters(img, height, width, output_name);
+	RGBQUAD** bin;
+    char tmp_name[500] = "images/output";
+    if(strncmp(img_name,"images/input", 12) == 0){
+        for (i = 11; i < strlen(img_name); ++i){
+            tmp_name[i+1] = img_name[i];
+        }
+        strcpy(img_name,tmp_name);
+    }
+    bin = apply_necessary_filters(img, height, width, img_name);
 	matriz_a = circle_detection(bin, height, width, max_r, min_r);
 	make_votation(bin, height, width, max_r, min_r, matriz_a, &x_c, &y_c, &r_c);
 	bin = segmented_image(copia_orig, height, width, r_c, x_c, y_c);
@@ -180,7 +193,10 @@ void make_diagnoses(PPMFILEHEADER ppm_header, RGBQUAD** img, char* output_name){
     read_header_PPM(output_img, &ppm_header);
     fclose(output_img);
 
-	output_img = fopen(output_name,"w");
+    strncpy(img_name, tmp_name, strlen(tmp_name) - 4);
+    img_name[strlen(output_name)-4] = '\0';
+    strcat(img_name,"_seg.ppm");
+	output_img = fopen(img_name,"w");
 	
 	if(output_img == NULL){
 		fprintf(stderr, "File not opened!!\n");
@@ -204,12 +220,20 @@ void make_diagnoses(PPMFILEHEADER ppm_header, RGBQUAD** img, char* output_name){
 			}
 		}
 	}
+
+    diagnose_file = fopen(output_name,"w");
+    
+    if(output_img == NULL){
+        fprintf(stderr, "File not opened!!\n");
+        return ;
+    }
+
 	diagnose = 100.0*sum/total;
-	fprintf(stdout, "O paciente possui %.2f %% de comprometimento da retina\n", diagnose);
+	fprintf(diagnose_file, "O paciente possui %.2f %% de comprometimento da retina\n", diagnose);
 	if (diagnose > 50) {
-		fprintf(stdout, "Detectado catarata!\n");
+		fprintf(diagnose_file, "Detectado catarata!\n");
 	} else {
-		fprintf(stdout, "Não detectado catarata!\n");
+		fprintf(diagnose_file, "Não detectado catarata!\n");
 	}
 }
 

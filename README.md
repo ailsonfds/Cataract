@@ -40,7 +40,7 @@
 _catarata_ é capaz de processar um conjunto de parâmetros, como indicado a  seguir:
 - _-i_ _input-image_ a  imagem de entrada a  ser processada.
 	
-	> _WARNING!!_ Não me responsabilizo pelo diagnóstico em imagens que não sejam ppm.
+	> _WARNING!!_ Utilize apenas imagens que sejam no formato ppm.
 
 - _-o_ _diagnose-file_ (opcional) indica o nome do arquivo texto contendo o diagnóstico. Caso opte por não adicionar essa opção, o diagnostico será impresso na saída padrão.
 

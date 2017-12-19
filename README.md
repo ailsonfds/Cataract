@@ -38,9 +38,9 @@
 ## Funcionalidades do programa
 
 _catarata_ é capaz de processar um conjunto de parâmetros, como indicado a  seguir:
-	- -i <input-image> a  imagem de entrada a  ser processada.
-	- -f <input-image-format> indica o  formato da imagem de entrada (bmp ou ppm).
-	- -o <diagnose-file> (opcional) indica o nome do arquivo texto contendo o diagnóstico. Caso opte por não adicionar essa opção, o diagnostico será impresso na saída padrão.
+	- _-i_ <input-image> a  imagem de entrada a  ser processada.
+	- _-f_ <input-image-format> indica o  formato da imagem de entrada (bmp ou ppm).
+	- _-o_ <diagnose-file> (opcional) indica o nome do arquivo texto contendo o diagnóstico. Caso opte por não adicionar essa opção, o diagnostico será impresso na saída padrão.
 
 Exemplo de execução: 
 

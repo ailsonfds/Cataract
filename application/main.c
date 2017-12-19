@@ -1,5 +1,7 @@
 #include "cataract.h"
+#include "args.h"
 #include <time.h>
+
 
 int main(int argc, char **argv){
 	FILE *input_img;
